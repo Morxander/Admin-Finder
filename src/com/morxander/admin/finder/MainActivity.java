@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (!txt_box_url.getText().toString().startsWith("http://")
-						|| !txt_box_url.getText().toString()
+						&& !txt_box_url.getText().toString()
 								.startsWith("https://")) {
 					txt_box_url.setText("http://"
 							+ txt_box_url.getText().toString());
@@ -142,8 +142,12 @@ public class MainActivity extends Activity {
 				{
 					txt_log.append(admins.get(i) + "\n");
 				}
+				// clear everything back
 				scroll.smoothScrollTo(0, txt_log.getHeight());
 				bt_find.setEnabled(true);
+				txt_box_url.setText("");
+				admins.clear();
+				current_url = "";
 				num = 0;
 			}
 			super.onPostExecute(result);
