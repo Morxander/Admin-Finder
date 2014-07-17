@@ -13,9 +13,13 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,6 +60,12 @@ public class MainActivity extends Activity {
 		setOnClick();
 	}
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		// TODO Auto-generated method stub
+		super.onConfigurationChanged(newConfig);
+	}
+
 	// initialize vars & ui components
 	private void initializeVars() {
 		setContentView(R.layout.activity_main);
@@ -76,19 +86,44 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				if (!txt_box_url.getText().toString().startsWith("http://")
-						&& !txt_box_url.getText().toString()
-								.startsWith("https://")) {
-					txt_box_url.setText("http://"
-							+ txt_box_url.getText().toString());
+				if(!txt_box_url.getText().toString().equals(""))
+				{
+					if (!txt_box_url.getText().toString().startsWith("http://")
+							&& !txt_box_url.getText().toString()
+									.startsWith("https://")) {
+						txt_box_url.setText("http://"
+								+ txt_box_url.getText().toString());
+					}
+					bt_find.setEnabled(false);
+					new RequestTask().execute(String.valueOf(txt_box_url.getText()
+							.toString() + "/" + paths[num]));
+				}else if(!haveNetworkConnection()){
+					txt_log.setText("You don't have an Internet Connection");
+				}else{
+					txt_log.setText("Please Enter a URL");
 				}
-				bt_find.setEnabled(false);
-				new RequestTask().execute(String.valueOf(txt_box_url.getText()
-						.toString() + "/" + paths[num]));
 			}
 		});
 	}
 
+	// Method For Internet Checking
+	private boolean haveNetworkConnection() {
+		boolean haveConnectedWifi = false;
+		boolean haveConnectedMobile = false;
+
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+		for (NetworkInfo ni : netInfo) {
+			if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+				if (ni.isConnected())
+					haveConnectedWifi = true;
+			if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+				if (ni.isConnected())
+					haveConnectedMobile = true;
+		}
+		return haveConnectedWifi || haveConnectedMobile;
+	}
+	
 	// the AsynTask class which will make the http requests to avoid
 	// NetworkOnMainThreadException
 	class RequestTask extends AsyncTask<String, String, String> {
